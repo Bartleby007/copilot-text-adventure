@@ -1,5 +1,6 @@
 const output = document.getElementById('game-output');
 const input = document.getElementById('game-input');
+const actionsContainer = document.getElementById('game-actions');
 
 const gameState = {
   location: 'start',
@@ -21,7 +22,7 @@ const scenes = {
   hallway: {
     description: 'You are in a long hallway. There is a window at the end.',
     actions: {
-      'look': () => 'The hallway is dimly lit. The window is closed.',
+      look: () => 'The hallway is dimly lit. The window is closed.',
       'go south': () => {
         gameState.location = 'start';
         return 'You return to the small room.';
@@ -38,19 +39,40 @@ function showInventory() {
 }
 
 function render() {
-  output.innerHTML += `<div class="desc">${scenes[gameState.location].description}</div>`;
+  output.innerHTML = `<div class="desc">${scenes[gameState.location].description}</div>`;
+  actionsContainer.innerHTML = '';
+  const actions = scenes[gameState.location].actions;
+  Object.keys(actions).forEach(action => {
+    const btn = document.createElement('button');
+    btn.textContent = prettifyAction(action);
+    btn.className = 'action-btn';
+    btn.onclick = () => handleAction(action);
+    actionsContainer.appendChild(btn);
+  });
   output.scrollTop = output.scrollHeight;
+}
+
+function prettifyAction(action) {
+  if (action === 'look') return 'Look Around';
+  if (action === 'inventory') return 'Check Inventory';
+  // Capitalize first letter for movement and other actions
+  return action.charAt(0).toUpperCase() + action.slice(1);
+}
+
+function handleAction(command) {
+  input.value = '';
+  output.innerHTML += `<div class="cmd">&gt; ${command}</div>`;
+  const actions = scenes[gameState.location].actions;
+  let response = actions[command] ? actions[command]() : "I don't understand that.";
+  output.innerHTML += `<div class="resp">${response}</div>`;
+  render();
 }
 
 function handleInput(e) {
   if (e.key === 'Enter') {
     const command = input.value.trim().toLowerCase();
-    input.value = '';
-    output.innerHTML += `<div class="cmd">&gt; ${command}</div>`;
-    const actions = scenes[gameState.location].actions;
-    let response = actions[command] ? actions[command]() : "I don't understand that.";
-    output.innerHTML += `<div class="resp">${response}</div>`;
-    output.scrollTop = output.scrollHeight;
+    if (!command) return;
+    handleAction(command);
   }
 }
 
