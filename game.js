@@ -42,11 +42,12 @@ function render() {
   output.innerHTML = `<div class="desc">${scenes[gameState.location].description}</div>`;
   actionsContainer.innerHTML = '';
   const actions = scenes[gameState.location].actions;
-  Object.keys(actions).forEach(action => {
+  Object.keys(actions).forEach(actionKey => {
     const btn = document.createElement('button');
-    btn.textContent = prettifyAction(action);
+    btn.textContent = prettifyAction(actionKey);
     btn.className = 'action-btn';
-    btn.onclick = () => handleAction(action);
+    btn.setAttribute('data-action', actionKey);
+    btn.onclick = () => handleAction(actionKey);
     actionsContainer.appendChild(btn);
   });
   output.scrollTop = output.scrollHeight;
